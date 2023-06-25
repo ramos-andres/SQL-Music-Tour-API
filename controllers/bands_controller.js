@@ -7,6 +7,7 @@ const { Op } = require('sequelize');
 // FIND ALL BANDS
 bands.get('/', async (req, res) => {
     try {
+        const { name = '', limit = 3, offset = 0 } = req.query;
         const searchTerm = req.query.name ? req.query.name : '';
         const foundBands = await Band.findAll({
             order: [
@@ -15,15 +16,17 @@ bands.get('/', async (req, res) => {
             ],
             where: {
                 name: {
-                    [Op.iLike]: `%${searchTerm}%`
+                    [Op.iLike]: `%${name}%`
                 }
-            }
+            },
+            offset,
+            limit
         });
         res.status(200).json(foundBands);
     } catch (error) {
         res.status(500).json(error)
     }
-})
+});
 
 // FIND A SPECIFIC BAND
 bands.get('/:id', async (req,res) => {
@@ -64,12 +67,12 @@ bands.put('/:id', async (req, res) => {
             }
         })
         res.status(200).json({
-            message: `Successfully updated ${updatedBands} band(s)`
+            message: `Successfully updated ${updatedBand} band(s)`
         })
     } catch(err) {
         res.status(500).json(err)
     }
-})
+});
 
 // DELETE A BAND
 bands.delete('/:id', async (req, res) => {
@@ -80,12 +83,12 @@ bands.delete('/:id', async (req, res) => {
             }
         })
         res.status(200).json({
-            message: `Successfully deleted ${deletedBands} band(s)`
+            message: `Successfully deleted ${deletedBand} band(s)`
         })
     } catch(err) {
         res.status(500).json(err)
     }
-})
+});
 
 // EXPORT
 module.exports = bands;
