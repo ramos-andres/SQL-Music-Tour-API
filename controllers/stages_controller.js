@@ -1,7 +1,7 @@
 // DEPENDENCIES
 const stages = require('express').Router();
 const db = require('../models');
-const { Stage } = db;
+const { Stage, Event } = db;
 const { Op } = require('sequelize');
 
 stages.get('/', async (req, res) => {
@@ -23,19 +23,27 @@ stages.get('/', async (req, res) => {
     }
 });
 
-stages.get('/:id', async (req,res) => {
-    const {id} = req.params
+stages.get('/:name', async (req,res) => {
+    const { name } = req.params;
     try {
     const foundStage = await Stage.findOne({
-        where: {stage_id: id}
-    })
+        where: { name },
+        include: {
+            model: Event,
+            as: 'events',
+            through: { attributes: [] }
+        },
+        order: [
+            [{ model: Event, as: 'events' }, 'date', 'ASC']
+        ]
+    });
     if (!foundStage) {
         res.status(404).json({message: 'Could not find Stage'})
     } else {
-        res.status(200).json(foundStage)
+        res.status(200).json(foundStage);
     }
     } catch (error) {
-    res.status(500).json(error)
+    res.status(500).json(error.toString());
     }
 });
 
